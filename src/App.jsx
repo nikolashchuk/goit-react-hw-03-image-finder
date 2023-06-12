@@ -24,10 +24,10 @@ export default class App extends Component {
   componentDidUpdate(_, prevState) {
     const { query, page } = this.state;
 
-    if (prevState.query !== query) {
+    const fetchData = () => {
       this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
 
-      fetchAPI(query)
+      fetchAPI(query, page)
         .then(({ hits, totalHits }) => {
           const array = hits.map(hit => ({
             id: hit.id,
@@ -40,44 +40,86 @@ export default class App extends Component {
             alert(`Sorry, but there is no any data for ${query}`);
           }
 
-          return this.setState({
-            page: 1,
-            images: array,
-            imagesOnPage: array.length,
+          return this.setState(prevState => ({
+            page: prevState.page === 1 ? 1 : prevState.page,
+            images:
+              prevState.page === 1 ? array : [...prevState.images, ...array],
+            imagesOnPage: array.length + prevState.imagesOnPage,
             totalImages: totalHits,
-          });
+          }));
         })
         .catch(error => this.setState({ error }))
         .finally(() =>
           this.setState(({ isLoading }) => ({ isLoading: !isLoading }))
         );
+    };
+
+    if (prevState.query !== query) {
+      fetchData();
     }
 
     if (prevState.page !== page && page !== 1) {
-      this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
-
-      fetchAPI(query, page)
-        .then(({ hits }) => {
-          const array = hits.map(hit => ({
-            id: hit.id,
-            tag: hit.tags,
-            smallImage: hit.webformatURL,
-            largeImage: hit.largeImageURL,
-          }));
-
-          return this.setState(({ images, imagesOnPage }) => {
-            return {
-              images: [...images, ...array],
-              imagesOnPage: array.length + imagesOnPage,
-            };
-          });
-        })
-        .catch(error => this.setState({ error }))
-        .finally(() =>
-          this.setState(({ isLoading }) => ({ isLoading: !isLoading }))
-        );
+      fetchData();
     }
   }
+
+  // componentDidUpdate(_, prevState) {
+  //   const { query, page } = this.state;
+
+  //   if (prevState.query !== query) {
+  //     this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
+
+  //     fetchAPI(query)
+  //       .then(({ hits, totalHits }) => {
+  //         const array = hits.map(hit => ({
+  //           id: hit.id,
+  //           tag: hit.tags,
+  //           smallImage: hit.webformatURL,
+  //           largeImage: hit.largeImageURL,
+  //         }));
+
+  //         if (!totalHits) {
+  //           alert(`Sorry, but there is no any data for ${query}`);
+  //         }
+
+  //         return this.setState({
+  //           page: 1,
+  //           images: array,
+  //           imagesOnPage: array.length,
+  //           totalImages: totalHits,
+  //         });
+  //       })
+  //       .catch(error => this.setState({ error }))
+  //       .finally(() =>
+  //         this.setState(({ isLoading }) => ({ isLoading: !isLoading }))
+  //       );
+  //   }
+
+  //   if (prevState.page !== page && page !== 1) {
+  //     this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
+
+  //     fetchAPI(query, page)
+  //       .then(({ hits }) => {
+  //         const array = hits.map(hit => ({
+  //           id: hit.id,
+  //           tag: hit.tags,
+  //           smallImage: hit.webformatURL,
+  //           largeImage: hit.largeImageURL,
+  //         }));
+
+  //         return this.setState(({ images, imagesOnPage }) => {
+  //           return {
+  //             images: [...images, ...array],
+  //             imagesOnPage: array.length + imagesOnPage,
+  //           };
+  //         });
+  //       })
+  //       .catch(error => this.setState({ error }))
+  //       .finally(() =>
+  //         this.setState(({ isLoading }) => ({ isLoading: !isLoading }))
+  //       );
+  //   }
+  // }
 
   getResult = query => {
     this.setState({ query });
