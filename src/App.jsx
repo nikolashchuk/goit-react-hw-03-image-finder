@@ -122,7 +122,7 @@ export default class App extends Component {
   // }
 
   getResult = query => {
-    this.setState({ query });
+    this.setState({ query, page: 1 });
   };
 
   onLoadMore = () => {
