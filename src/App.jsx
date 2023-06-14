@@ -44,7 +44,12 @@ export default class App extends Component {
             page: prevState.page === 1 ? 1 : prevState.page,
             images:
               prevState.page === 1 ? array : [...prevState.images, ...array],
-            imagesOnPage: array.length + prevState.imagesOnPage,
+            // imagesOnPage: array.length + prevState.imagesOnPage,
+            // imagesOnPage: page < Math.ceil(totalHits / prevState.imagesOnPage),
+            imagesOnPage:
+              prevState.page === 1
+                ? array.length
+                : prevState.imagesOnPage + array.length,
             totalImages: totalHits,
           }));
         })
